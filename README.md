@@ -17,7 +17,7 @@ But a simple recompile solved my problem ...
 
 ## Installation
 
-For Linux and OSX:
+Here is the recompiled version which fixxes the cert issue. For Linux and OSX:
 ```
 curl -L https://github.com/lalyos/termshare/releases/download/v0.2.0/termshare_v0.2.0_$(uname -s)_x86_64.tgz| tar -xz -C /usr/local/bin
 ```
