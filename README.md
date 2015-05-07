@@ -4,56 +4,41 @@ Quick and easy terminal sharing for getting quick help or pair sysadmin'ing.
 
 Share interactive control with a copilot and/or a readonly view of your terminal with others. Copilots and viewers can use the client or a web-based terminal.
 
-The service is run by the support of the community via Gittip donations. [Please donate to keep termshare running and support the work of the author.](https://www.gittip.com/termshare/)
+## THIS IS A FOR
 
+For the original version please go to https://github.com/progrium/termshare
+
+Lately i faced this issue:
 ```
-$ termshare 
- _                          _                    
-| |_ ___ _ __ _ __ ___  ___| |__   __ _ _ __ ___ 
-| __/ _ \ '__| '_ ` _ \/ __| '_ \ / _` | '__/ _ \
-| ||  __/ |  | | | | | \__ \ | | | (_| | | |  __/
- \__\___|_|  |_| |_| |_|___/_| |_|\__,_|_|  \___|
-
-Session URL: https://termsha.re/3b5cc0d7-185f-4568-6e2d-7d6e77f836aa
-
-[termshare] $
+panic: Post https://termsha.re:443/c4a9d55c-8038-4622-6fb5-a66105f61a36: x509: certificate signed by unknown authority
 ```
 
-## Install
+But a simple recompile solved my problem ...
 
+## Installation
+
+For Linux and OSX:
 ```
-curl -sL https://termsha.re/download/$(uname -s) | tar -C /usr/local/bin -zxf -
-```
-
-## Usage
-
-```
-Usage:  termshare [session-url]
-
-Starts termshare sesion or connects to session if session-url is specified
-
-  -c=false: allow a copilot to join to share control
-  -d=false: run the server daemon
-  -n=false: do not use tls endpoints
-  -p=false: only allow a copilot and no viewers
-  -s="termsha.re:443": use a different server to start session
-  -v=false: print version and exit
+curl -L https://github.com/lalyos/termshare/releases/download/v0.2.0/termshare_v0.2.0_$(uname -s)_x86_64.tgz| tar -xz -C /usr/local/bin
 ```
 
-## Running the Termshare Server Locally
+## tl;dr
 
-The Termshare server is meant to be run on Heroku, but you can also run it locally. There are just a few tricky bits. Run the server like this:
+I spent almost a day to figure out, but still couldn't find out the root cause.
+`termsha.re` is using HTTPS. Its certificate is signed with this chain:
+- COMODO_RSA_Domain_Validation_Secure_Server_CA
+- COMODO_RSA_Certification_Authority
+- AddTrust_External_CA_Root
 
-	$ PORT=8080 termshare -d -n -s localhost:8080
+Looks like golang is having problem to accept it. Golfing itself doesn't have any cert storage its using 
+it from the OS. In https://golang.org/src/crypto/x509/root_darwin.go you can see the source is: `/System/Library/Keychains/SystemRootCertificates.keychain`
 
-Now when creating a session, you not only need to specify to use the local server, but you need to pass `-n` otherwise it will try to connect with TLS, which is only available via Heroku.
+### Is my keychain missing something?
 
-	$ termshare -n -s localhost:8080
+So it seems like my OS X keychain's ca cert list is missing something. But:
+- original `termshare` shows unknown authority.
+- recompiled `termshare` connects fine.
 
-The Session URL it gives you should be accurate, but if you use it with termshare you do still need to pass `-n`. For example:
-
-	$ termshare -n http://localhost:8080/43aa4bd7-6583-41aa-446d-dc32fcceba2e
-
-### License
-
-BSD
+Further mystery:
+- I have an MacBookPro13 with OS X 10.10.3, where the original `termshare` works fine
+- My new MacBookPro15 with OS X 10.10.3, the original `termshare` complains about  certificate signed by unknown authority
