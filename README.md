@@ -4,7 +4,7 @@ Quick and easy terminal sharing for getting quick help or pair sysadmin'ing.
 
 Share interactive control with a copilot and/or a readonly view of your terminal with others. Copilots and viewers can use the client or a web-based terminal.
 
-## THIS IS A FOR
+## THIS IS JUST A FORK
 
 For the original version please go to https://github.com/progrium/termshare
 
