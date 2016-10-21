@@ -23,7 +23,7 @@ The original server has expired ssl certs. So I did created an **unsecure** serv
 termshare -n -s=termshare.sequenceiq.com:9999
 ```
 
-## tl;dr
+## Issue with the original version
 
 Lately i faced this issue:
 ```
