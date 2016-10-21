@@ -32,13 +32,6 @@ panic: Post https://termsha.re:443/c4a9d55c-8038-4622-6fb5-a66105f61a36: x509: c
 
 But a simple recompile solved my problem ...
 
-## Installation
-
-Here is the recompiled version which fixxes the cert issue. For Linux and OSX:
-```
-curl -L https://github.com/lalyos/termshare/releases/download/v0.2.0/termshare_v0.2.0_$(uname -s)_x86_64.tgz| tar -xz -C /usr/local/bin
-```
-
 ## tl;dr
 
 I spent almost a day to figure out, but still couldn't find out the root cause.
