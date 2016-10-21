@@ -8,6 +8,23 @@ Share interactive control with a copilot and/or a readonly view of your terminal
 
 For the original version please go to https://github.com/progrium/termshare
 
+## Installation
+
+For Linux and OSX:
+```
+curl -L https://github.com/lalyos/termshare/releases/download/v0.2.0/termshare_v0.2.0_$(uname -s)_x86_64.tgz| tar -xz -C /usr/local/bin
+```
+
+## Usage
+
+The original server has expired ssl certs. So I did created an **unsecure** server, which works, but be avare of man in the middle attacks, so dont share any sensitive data on that channel:
+
+```
+termshare -n -s=termshare.sequenceiq.com:9999
+```
+
+## tl;dr
+
 Lately i faced this issue:
 ```
 panic: Post https://termsha.re:443/c4a9d55c-8038-4622-6fb5-a66105f61a36: x509: certificate signed by unknown authority
