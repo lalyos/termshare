@@ -29,6 +29,7 @@ const VERSION = "v0.2.0"
 
 var daemon *bool = flag.Bool("d", false, "run the server daemon")
 var copilot *bool = flag.Bool("c", false, "allow a copilot to join to share control")
+var multicopilot *bool = flag.Bool("m", false, "allow multiple copilot to join to share control")
 var private *bool = flag.Bool("p", false, "only allow a copilot and no viewers")
 var server *string = flag.String("s", "termsha.re:443", "use a different server to start session")
 var notls *bool = flag.Bool("n", false, "do not use tls endpoints")
@@ -385,7 +386,7 @@ func startDaemon() {
 						}
 					}
 				}).ServeHTTP(w, r)
-			case session.Pilot != nil && session.Copilot == nil && session.AllowCopilot && isWebsocket:
+			case session.Pilot != nil && (session.Copilot == nil || *multicopilot) && session.AllowCopilot && isWebsocket:
 				websocket.Handler(func(conn *websocket.Conn) {
 					session.Copilot = conn
 					session.CopilotBuffer.w = conn
