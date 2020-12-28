@@ -19,10 +19,10 @@ import (
 	"syscall"
 	"time"
 
-	"golang.org/x/net/websocket"
 	"github.com/heroku/hk/term"
 	"github.com/kr/pty"
-	"github.com/nu7hatch/gouuid"
+	uuid "github.com/nu7hatch/gouuid"
+	"golang.org/x/net/websocket"
 )
 
 const VERSION = "v0.2.0"
@@ -32,6 +32,7 @@ var copilot *bool = flag.Bool("c", false, "allow a copilot to join to share cont
 var private *bool = flag.Bool("p", false, "only allow a copilot and no viewers")
 var server *string = flag.String("s", "termsha.re:443", "use a different server to start session")
 var notls *bool = flag.Bool("n", false, "do not use tls endpoints")
+var fixsession *string = flag.String("f", "", "fixed session name istead of generate UUID")
 var version *bool = flag.Bool("v", false, "print version and exit")
 
 var banner = ` _                          _                    
@@ -197,9 +198,15 @@ func baseUrl(protocol string) string {
 }
 
 func createSession() {
-	name, err := uuid.NewV4()
+	var err error
+	var name fmt.Stringer
+
+	name, err = uuid.NewV4()
 	if err != nil {
 		panic(err)
+	}
+	if *fixsession != "" {
+		name = bytes.NewBufferString(*fixsession)
 	}
 	values := map[bool]string{
 		true:  "true",
