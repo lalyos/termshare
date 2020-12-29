@@ -19,10 +19,10 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/creack/pty"
+	uuid "github.com/nu7hatch/gouuid"
 	"golang.org/x/net/websocket"
-	"github.com/heroku/hk/term"
-	"github.com/kr/pty"
-	"github.com/nu7hatch/gouuid"
+	"golang.org/x/term"
 )
 
 const VERSION = "v0.2.0"
@@ -34,8 +34,8 @@ var server *string = flag.String("s", "termsha.re:443", "use a different server 
 var notls *bool = flag.Bool("n", false, "do not use tls endpoints")
 var version *bool = flag.Bool("v", false, "print version and exit")
 
-var banner = ` _                          _                    
-| |_ ___ _ __ _ __ ___  ___| |__   __ _ _ __ ___ 
+var banner = ` _                          _
+| |_ ___ _ __ _ __ ___  ___| |__   __ _ _ __ ___
 | __/ _ \ '__| '_ ` + "`" + ` _ \/ __| '_ \ / _` + "`" + ` | '__/ _ \
 | ||  __/ |  | | | | | \__ \ | | | (_| | | |  __/
  \__\___|_|  |_| |_| |_|___/_| |_|\__,_|_|  \___|
@@ -220,11 +220,8 @@ func createSession() {
 	if err != nil {
 		panic(err)
 	}
-	cols, err := term.Cols()
-	if err != nil {
-		panic(err)
-	}
-	lines, err := term.Lines()
+
+	cols, lines, err := term.GetSize(int(os.Stdin.Fd()))
 	if err != nil {
 		panic(err)
 	}
@@ -237,32 +234,41 @@ func createSession() {
 		"COLUMNS=" + strconv.Itoa(cols),
 		"LINES=" + strconv.Itoa(lines),
 	}
-	pty, err := pty.Start(cmd)
+	ptmx, err := pty.Start(cmd)
 	if err != nil {
 		panic(err)
 	}
-	if err := term.MakeRaw(os.Stdin); err != nil {
+	defer func() { _ = ptmx.Close() }()
+
+	oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
+	if err != nil {
 		panic(err)
 	}
-	exitSignal := make(chan os.Signal)
-	signal.Notify(exitSignal, os.Interrupt, syscall.SIGTERM)
+	defer func() { _ = term.Restore(int(os.Stdin.Fd()), oldState) }() // Best effort.
+
+	// Handle pty size.
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, syscall.SIGWINCH)
 	go func() {
-		<-exitSignal
-		term.Restore(os.Stdin)
-		os.Exit(0)
+		for range ch {
+			if err := pty.InheritSize(os.Stdin, ptmx); err != nil {
+				log.Printf("error resizing pty: %s", err)
+			}
+		}
 	}()
-	defer term.Restore(os.Stdin)
+	ch <- syscall.SIGWINCH
+
 	eof := make(chan bool, 1)
 	go func() {
-		io.Copy(io.MultiWriter(os.Stdout, conn), pty)
+		io.Copy(io.MultiWriter(os.Stdout, conn), ptmx)
 		eof <- true
 	}()
 	go func() {
-		io.Copy(pty, os.Stdin)
+		io.Copy(ptmx, os.Stdin)
 		eof <- true
 	}()
 	go func() {
-		io.Copy(pty, conn)
+		io.Copy(ptmx, conn)
 		eof <- true
 	}()
 	go func() {
@@ -295,17 +301,12 @@ func joinSession(sessionUrl string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err := term.MakeRaw(os.Stdin); err != nil {
-		log.Fatal(err)
+	oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
+	if err != nil {
+		panic(err)
 	}
-	exitSignal := make(chan os.Signal)
-	signal.Notify(exitSignal, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-exitSignal
-		term.Restore(os.Stdin)
-		os.Exit(0)
-	}()
-	defer term.Restore(os.Stdin)
+	defer func() { _ = term.Restore(int(os.Stdin.Fd()), oldState) }() // Best effort.
+
 	eof := make(chan bool, 1)
 	go func() {
 		io.Copy(os.Stdout, conn)
