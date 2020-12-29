@@ -415,7 +415,8 @@ func startDaemon() {
 						<-session.EOF
 					} else {
 						log.Println(sessionName + ": viewer connected [browser]")
-						w.Write(term_html())
+						b, _ := termHtmlBytes()
+						w.Write(b)
 					}
 				}
 			}
