@@ -1,6 +1,6 @@
 # termshare
 
-Quick and easy terminal sharing for getting quick help or pair sysadmin'ing. 
+Quick and easy terminal sharing for getting quick help or pair sysadmin'ing.
 
 Share interactive control with a copilot and/or a readonly view of your terminal with others. Copilots and viewers can use the client or a web-based terminal.
 
@@ -12,7 +12,7 @@ For the original version please go to https://github.com/progrium/termshare
 
 For Linux and OSX:
 ```
-curl -L https://github.com/lalyos/termshare/releases/download/v0.2.0/termshare_v0.2.0_$(uname -s)_x86_64.tgz| tar -xz -C /usr/local/bin
+curl -L https://github.com/lalyos/termshare/releases/download/v0.3.0/termshare_v0.3.0_$(uname -s)_x86_64.tgz| tar -xz -C /usr/local/bin
 ```
 
 ## Usage
@@ -40,7 +40,7 @@ I spent almost a day to figure out, but still couldn't find out the root cause.
 - COMODO_RSA_Certification_Authority
 - AddTrust_External_CA_Root
 
-Looks like golang is having problem to accept it. Golfing itself doesn't have any cert storage its using 
+Looks like golang is having problem to accept it. Golfing itself doesn't have any cert storage its using
 it from the OS. In https://golang.org/src/crypto/x509/root_darwin.go you can see the source is: `/System/Library/Keychains/SystemRootCertificates.keychain`
 
 ### Is my keychain missing something?
