@@ -25,7 +25,7 @@ import (
 	"golang.org/x/term"
 )
 
-const VERSION = "v0.2.0"
+const VERSION = "v0.3.0"
 
 var daemon *bool = flag.Bool("d", false, "run the server daemon")
 var copilot *bool = flag.Bool("c", false, "allow a copilot to join to share control")
