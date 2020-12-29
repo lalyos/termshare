@@ -1,6 +1,9 @@
 <!doctype html>
 <link rel="stylesheet" href="https://unpkg.com/xterm@4.9.0/css/xterm.css" />
 <script src="https://unpkg.com/xterm@4.9.0/lib/xterm.js" ></script>
+<script src="https://unpkg.com/xterm-addon-web-links@0.4.0/lib/xterm-addon-web-links.js" ></script>
+<script src="https://unpkg.com/xterm-addon-fit@0.4.0/lib/xterm-addon-fit.js" ></script>
+
 <style>
   body { background: #000; }
   .terminal { font-size: 16px; }
@@ -18,8 +21,13 @@
         cursorBlink: true,
         screenKeys: true
       });
+      term.loadAddon(new WebLinksAddon.WebLinksAddon());
+
+      const fitAddon = new FitAddon.FitAddon();
+      term.loadAddon(fitAddon);
       term.onData(function(data) { socket.send(data); });
       term.open(document.body);
+      fitAddon.fit();
       socket.onmessage = function(event) { term.write(event.data); };
       socket.onclose = function() { term.destroy(); };
     }
