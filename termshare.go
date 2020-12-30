@@ -240,6 +240,7 @@ func createSession() {
 		"USER=" + os.Getenv("USER"),
 		"COLUMNS=" + strconv.Itoa(cols),
 		"LINES=" + strconv.Itoa(lines),
+		"TERMSHARE=" + baseUrl("http") + "/" + name.String(),
 	}
 	ptmx, err := pty.Start(cmd)
 	if err != nil {
